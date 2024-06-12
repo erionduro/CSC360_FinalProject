@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import Chart from "chart.js/auto";
-import incidents from "../Common.js"; 
+import Chart from "chart.js/auto"; 
 
-export default function GraphMTTR() {
+export default function GraphMTTR({incidents}) {
 const startedIncidents = incidents.filter(incident => incident.header.inProgress === true);
 
   // Function to calculate average mean time to respond

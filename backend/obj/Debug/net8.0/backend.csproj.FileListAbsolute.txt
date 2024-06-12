@@ -32,3 +32,4 @@
 /workspaces/CSC360_FinalProject/backend/obj/Debug/net8.0/backend.pdb
 /workspaces/CSC360_FinalProject/backend/obj/Debug/net8.0/backend.genruntimeconfig.cache
 /workspaces/CSC360_FinalProject/backend/obj/Debug/net8.0/ref/backend.dll
+/workspaces/CSC360_FinalProject/backend/bin/Debug/net8.0/incidentDB.json

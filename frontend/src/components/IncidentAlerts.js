@@ -1,10 +1,9 @@
 import React from 'react';
 import { Card, Button, ListGroup, Row, Col } from 'react-bootstrap';
-import incidents from '../Common.js';
 import {Link} from 'react-router-dom';
 import { Bell } from 'react-bootstrap-icons';
 
-const IncidentAlerts = () => {
+const IncidentAlerts = ({incidents}) => {
   // Filter incidents that are not in progress
   const notInProgressIncidents = incidents.filter((incident) => incident.header.inProgress === false);
 

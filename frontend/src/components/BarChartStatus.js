@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { Container } from 'react-bootstrap';
 import Chart from 'chart.js/auto';
-import incidents from '../Common.js';
 
-const BarChartStatus = () => {
+const BarChartStatus = ({ incidents }) => {
   useEffect(() => {
     let chartInstance = null;
 
-    if (incidents.length > 0) {
+    if (incidents && incidents.length > 0) {
       const ctx = document.getElementById('incidentStatusChart');
       const incidentStatuses = {};
 
@@ -29,7 +28,7 @@ const BarChartStatus = () => {
           {
             label: 'Number of Incidents',
             data: Object.values(incidentStatuses),
-            backgroundColor: Object.values(colors), // Custom colors for each bar
+            backgroundColor: Object.keys(incidentStatuses).map(status => colors[status] || 'rgba(75, 192, 192, 0.2)'), // Custom colors for each bar
             borderColor: 'rgba(0, 0, 0, 1)',
             borderWidth: 1,
           },
@@ -80,7 +79,7 @@ const BarChartStatus = () => {
         chartInstance.destroy();
       }
     };
-  }, [incidents]); // Re-run effect when incidents array changes
+  }, [incidents]); // Add incidents as a dependency so it re-runs when incidents change
 
   return (
     <Container style={{ width: '600px', height: '400px' }}>

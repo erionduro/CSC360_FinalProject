@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Container } from "react-bootstrap";
 import Chart from "chart.js/auto";
-import incidents from "../Common.js";
 
-const BarChartType = () => {
+const BarChartType = ({ incidents }) => {
   useEffect(() => {
     let chartInstance = null;
 
-    if (incidents.length > 0) {
+    if (incidents && incidents.length > 0) {
       const ctx = document.getElementById("incidentTypeChart");
       const incidentTypes = {};
-      
+
       // Count occurrences of each incident type
       incidents.forEach((incident) => {
         const type = incident.header.type;
@@ -74,7 +73,7 @@ const BarChartType = () => {
         chartInstance.destroy();
       }
     };
-  }, [incidents]); // Re-run effect when incidents array changes
+  }, [incidents]); // Add incidents as a dependency so it re-runs when incidents change
 
   return (
     <Container style={{ width: "600px", height: "400px" }}>

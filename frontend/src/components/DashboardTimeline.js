@@ -1,9 +1,8 @@
 import React from "react";
 import { Container, Button } from "react-bootstrap";
-import incidents from "../Common.js"; 
 import { Link } from "react-router-dom";
 
-export default function DashboardTimeline() {
+export default function DashboardTimeline( {incidents} ) {
   // Sort incidents based on creation timestamp in descending order
   const sortedIncidents = incidents.sort((a, b) => b.timeline.creationTimestamp - a.timeline.creationTimestamp);
   

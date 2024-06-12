@@ -1,14 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
-import DashboardTimeline from '../components/DashboardTimeline';
-import IncidentTable from '../components/IncidentTable';
+import IncidentAlerts from '../components/IncidentAlerts';
 import GraphMTTR from '../components/GraphMTTR';
 import PieChartPriority from '../components/PieChartPriority';
 import BarChartType from '../components/BarChartType';
 import BarChartStatus from '../components/BarChartStatus';
-import IncidentAlerts from '../components/IncidentAlerts';
+import IncidentTable from '../components/IncidentTable';
+import DashboardTimeline from '../components/DashboardTimeline';
 
 function DashboardPage() {
+  const [apiIncidents, setApiIncidents] = useState(null);
+
+  const fetchIncidents = async () => {
+    try{
+      const response = await fetch('http://127.0.0.1:5123/incidents');
+      if (!response.ok){
+        throw new Error('Failed to fetch!');
+      }
+      const data = await response.json();
+      setApiIncidents(data);
+      console.log(apiIncidents);
+    } catch (error) {
+      console.error('Error fetching incidents: ', error.message)
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
+
+  if (!apiIncidents) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Container fluid>
       <Row>
@@ -21,7 +45,7 @@ function DashboardPage() {
         <Col>
           <Card>
             <Card.Body>
-              <IncidentAlerts />
+              <IncidentAlerts incidents={apiIncidents}/>
             </Card.Body>
           </Card>
         </Col>
@@ -35,28 +59,28 @@ function DashboardPage() {
               <div style={{ marginRight: '10px' }}>
                 <Card>
                   <Card.Body>
-                    <GraphMTTR />
+                    <GraphMTTR incidents={apiIncidents} />
                   </Card.Body>
                 </Card>
               </div>
               <div style={{ marginRight: '10px' }}>
                 <Card>
                   <Card.Body>
-                    <PieChartPriority />
+                    <PieChartPriority incidents={apiIncidents} />
                   </Card.Body>
                 </Card>
               </div>
               <div>
                 <Card>
                   <Card.Body>
-                    <BarChartType />
+                    <BarChartType incidents={apiIncidents} />
                   </Card.Body>
                 </Card>
               </div>
               <div>
                 <Card>
                   <Card.Body>
-                    <BarChartStatus />
+                    <BarChartStatus incidents={apiIncidents}/>
                   </Card.Body>
                 </Card>
               </div>
@@ -70,7 +94,7 @@ function DashboardPage() {
           <Card>
             <Card.Body>
               <h4 className="mb-4">All Incidents</h4>
-              <IncidentTable />
+              <IncidentTable incidents={apiIncidents} />
             </Card.Body>
           </Card>
         </Col>
@@ -81,7 +105,7 @@ function DashboardPage() {
           <Card>
             <Card.Body>
               <h4 className="mb-4">Incident Timeline</h4>
-              <DashboardTimeline />
+              <DashboardTimeline incidents={apiIncidents} />
             </Card.Body>
           </Card>
         </Col>

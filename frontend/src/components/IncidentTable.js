@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Table, Pagination } from 'react-bootstrap';
-import {Link} from 'react-router-dom';
-import incidents from '../Common.js';
+import { Link } from 'react-router-dom';
 
-const IncidentTable = () => {
+const IncidentTable = ({ incidents }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [incidentsPerPage] = useState(5); // Number of incidents per page
 
@@ -47,7 +46,7 @@ const IncidentTable = () => {
       </Table>
       <Pagination>
         {[...Array(Math.ceil(incidents.length / incidentsPerPage))].map((_, index) => (
-          <Pagination.Item key={index + 1} onClick={() => paginate(index + 1)}>
+          <Pagination.Item key={index + 1} active={index + 1 === currentPage} onClick={() => paginate(index + 1)}>
             {index + 1}
           </Pagination.Item>
         ))}

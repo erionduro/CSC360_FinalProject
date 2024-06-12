@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Container } from "react-bootstrap";
 import Chart from "chart.js/auto";
-import incidents from "../Common.js";
 
-const PieChartPriority = () => {
+const PieChartPriority = ({ incidents }) => {
   useEffect(() => {
     let chartInstance = null;
 
-    if (incidents.length > 0) {
+    if (incidents && incidents.length > 0) {
       const ctx = document.getElementById("priorityChart");
 
       // Count incidents by priority level
@@ -57,7 +56,7 @@ const PieChartPriority = () => {
         chartInstance.destroy();
       }
     };
-  }, []); // No dependencies, so it runs only once
+  }, [incidents]); // Add incidents as a dependency so it re-runs when incidents change
 
   return (
     <Container style={{ width: "400px", height: "400px" }}>
