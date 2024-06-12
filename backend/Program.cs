@@ -40,6 +40,49 @@ app.MapGet("/incidents", () => {
 .WithName("HelloWorld")
 .WithOpenApi();
 
+app.MapPost("/incidents", async (Incident newIncident) => {
+    var incidentsJson = await System.IO.File.ReadAllTextAsync("incidentDB.json");
+    var incidentDB = JsonSerializer.Deserialize<List<Incident>>(incidentsJson);
+
+    if (incidentDB != null)
+    {
+        incidentDB.Add(newIncident);
+        await System.IO.File.WriteAllTextAsync("incidentDB.json", JsonSerializer.Serialize(incidentDB, new JsonSerializerOptions { WriteIndented = true }));
+        return Results.Ok(newIncident);
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+})
+.WithName("CreateIncident")
+.WithOpenApi();
+
+app.MapPut("/incidents/{id}", async (string id, Incident updatedIncident) => {
+    var incidentsJson = await System.IO.File.ReadAllTextAsync("incidentDB.json");
+    var incidentDB = JsonSerializer.Deserialize<List<Incident>>(incidentsJson);
+
+    if (incidentDB != null)
+    {
+        var incidentIndex = incidentDB.FindIndex(incident => incident.header.id == id);
+        if (incidentIndex != -1)
+        {
+            incidentDB[incidentIndex] = updatedIncident;
+            await System.IO.File.WriteAllTextAsync("incidentDB.json", JsonSerializer.Serialize(incidentDB, new JsonSerializerOptions { WriteIndented = true }));
+            return Results.Ok(updatedIncident);
+        }
+        else
+        {
+            return Results.NotFound();
+        }
+    }
+    else
+    {
+        return Results.NotFound();
+    }
+})
+.WithName("UpdateIncident")
+.WithOpenApi();
 
 app.Run();
 

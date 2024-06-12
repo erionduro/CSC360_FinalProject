@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import IncidentDetailsPage from './pages/IncidentDetailsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import LandingPage from './pages/LandingPage';
+import AddIncidentPage from './pages/AddIncidentPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/incident/:id" element={<IncidentDetailsPage />} />
+        <Route path="/add-incident" element={<AddIncidentPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

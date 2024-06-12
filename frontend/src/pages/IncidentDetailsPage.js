@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import IncidentTimeline from '../components/IncidentTimeline.js';
 
@@ -8,6 +8,9 @@ const IncidentDetailPage = () => {
   const [apiIncidents, setApiIncidents] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [description, setDescription] = useState('');
+  const [notes, setNotes] = useState('');
 
   const fetchIncidents = async () => {
     try {
@@ -29,6 +32,50 @@ const IncidentDetailPage = () => {
     fetchIncidents();
   }, []);
 
+  useEffect(() => {
+    if (apiIncidents) {
+      const incident = apiIncidents.find(incident => incident.header.id === id);
+      if (incident) {
+        setDescription(incident.documentation.description);
+        setNotes(incident.documentation.notes);
+      }
+    }
+  }, [apiIncidents, id]);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5123/incidents/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...apiIncidents.find(incident => incident.header.id === id),
+          documentation: {
+            description,
+            notes,
+          },
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save!');
+      }
+      const updatedIncident = await response.json();
+      setApiIncidents(apiIncidents.map(incident =>
+        incident.header.id === id ? updatedIncident : incident
+      ));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving incident: ', error.message);
+    }
+  };
+
+  const setIncident = (updatedIncident) => {
+    setApiIncidents(apiIncidents.map(incident =>
+      incident.header.id === id ? updatedIncident : incident
+    ));
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -45,7 +92,13 @@ const IncidentDetailPage = () => {
 
   return (
     <Container>
-      <h2 className="my-4">Incident Details</h2>
+      <Row>
+        <Link to="/dashboard"><Button variant="secondary">Back to Dashboard</Button></Link>
+      </Row>
+      <Row>
+        <h2 className="my-4">Incident Details</h2>
+      </Row>
+      
       <div>
         <Row>
           <Col>
@@ -70,24 +123,38 @@ const IncidentDetailPage = () => {
         <Row>
           <Col>
             <h3>Timeline</h3>
-            <IncidentTimeline incident={incident} />
+            <IncidentTimeline incident={incident} setIncident={setIncident} />
           </Col>
           <Col>
             <h3>Documentation</h3>
             <Form>
               <Form.Group controlId="description">
                 <Form.Label>Description</Form.Label>
-                <Form.Control as="textarea" rows={3} value={incident.documentation.description} readOnly />
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={description}
+                  readOnly={!isEditing}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </Form.Group>
               <Form.Group controlId="notes">
                 <Form.Label>Notes</Form.Label>
-                <Form.Control as="textarea" rows={3} value={incident.documentation.notes} readOnly />
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={notes}
+                  readOnly={!isEditing}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
               </Form.Group>
-              {/* Add Edit and Save buttons for editing */}
-              {/* Add onSubmit handler to handle changes and write to database */}
             </Form>
           </Col>
         </Row>
+        <Button onClick={() => setIsEditing(!isEditing)}>
+          {isEditing ? 'Cancel' : 'Edit'}
+        </Button>
+        {isEditing && <Button onClick={handleSave}>Save</Button>}
       </div>
     </Container>
   );

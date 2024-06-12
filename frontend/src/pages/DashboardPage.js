@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Button, Container, Row, Col, Card } from 'react-bootstrap';
+import {Link} from 'react-router-dom';
 import IncidentAlerts from '../components/IncidentAlerts';
 import GraphMTTR from '../components/GraphMTTR';
 import PieChartPriority from '../components/PieChartPriority';
@@ -38,6 +39,13 @@ function DashboardPage() {
       <Row>
         <Col>
           <h2 className="mt-5 mb-4">Dashboard</h2>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Link to="/add-incident">
+            <Button variant="primary">Add New Incident</Button>
+          </Link>
         </Col>
       </Row>
       {/* Incident Alerts */}
