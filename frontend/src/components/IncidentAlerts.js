@@ -19,7 +19,7 @@ const IncidentAlerts = ({incidents}) => {
               <Row>
                 <Col>
                     <Row className="MyAlert">
-                       <strong><Link to={`/incident/${incident.header.id}`} className="text-white" >{incident.header.title}:</Link></strong>
+                       <strong><Link to={`/incident/${incident.id}`} className="text-white" >{incident.header.title}:</Link></strong>
                     </Row>
                     <Row>
                        {incident.documentation.description} 

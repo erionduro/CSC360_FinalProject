@@ -31,8 +31,8 @@ const IncidentTable = ({ incidents }) => {
         </thead>
         <tbody>
           {currentIncidents.map((incident) => (
-            <tr key={incident.header.id}>
-              <td><Link to={`/incident/${incident.header.id}`}>{incident.header.id}</Link></td>
+            <tr key={incident.header.headerId}>
+              <td><Link to={`/incident/${incident.id}`}>{incident.id}</Link></td>
               <td>{incident.header.title}</td>
               <td>{incident.header.type}</td>
               <td>{incident.header.impact}</td>

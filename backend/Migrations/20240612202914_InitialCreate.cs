@@ -5,7 +5,7 @@
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,10 +69,10 @@ namespace backend.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CreationTimestamp = table.Column<long>(type: "INTEGER", nullable: false),
-                    InProgressTimestamp = table.Column<long>(type: "INTEGER", nullable: false),
-                    ValidationTimestamp = table.Column<long>(type: "INTEGER", nullable: false),
-                    ClosedTimestamp = table.Column<long>(type: "INTEGER", nullable: false)
+                    CreationTimestamp = table.Column<long>(type: "INTEGER", nullable: true),
+                    InProgressTimestamp = table.Column<long>(type: "INTEGER", nullable: true),
+                    ValidationTimestamp = table.Column<long>(type: "INTEGER", nullable: true),
+                    ClosedTimestamp = table.Column<long>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

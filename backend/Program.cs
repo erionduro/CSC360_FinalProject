@@ -91,22 +91,56 @@ app.MapPost("/incidents", async (Incident newIncident, IncidentContext context) 
 .WithName("CreateIncident")
 .WithOpenApi();
 
-app.MapPut("/incidents/{id}", async (string id, Incident updatedIncident, IncidentContext context) =>
+app.MapPut("/incidents/{id}", async (int id, Incident updatedIncident, IncidentContext context) =>
 {
     var incident = await context.Incident.Include(i => i.Header)
                                          .Include(i => i.Raci)
                                          .Include(i => i.Timeline)
                                          .Include(i => i.Documentation)
-                                         .FirstOrDefaultAsync(i => i.Header.HeaderId == id);
+                                         .FirstOrDefaultAsync(i => i.Header.Id == id);
 
     if (incident != null)
     {
-        incident.Header = updatedIncident.Header;
-        incident.Raci = updatedIncident.Raci;
-        incident.Timeline = updatedIncident.Timeline;
-        incident.Documentation = updatedIncident.Documentation;
+        // Update the properties of the existing entity
+        if (incident.Header != null && updatedIncident.Header != null)
+        {
+            incident.Header.Title = updatedIncident.Header.Title;
+            incident.Header.Type = updatedIncident.Header.Type;
+            incident.Header.Impact = updatedIncident.Header.Impact;
+            incident.Header.Urgency = updatedIncident.Header.Urgency;
+            incident.Header.Priority = updatedIncident.Header.Priority;
+            incident.Header.Status = updatedIncident.Header.Status;
+            incident.Header.CreatedTimestamp = updatedIncident.Header.CreatedTimestamp;
+            incident.Header.InProgress = updatedIncident.Header.InProgress;
+            incident.Header.Validation = updatedIncident.Header.Validation;
+            incident.Header.Closed = updatedIncident.Header.Closed;
+        }
 
+        if (incident.Raci != null && updatedIncident.Raci != null)
+        {
+            incident.Raci.ResponsibleParties = updatedIncident.Raci.ResponsibleParties;
+            incident.Raci.AccountableParties = updatedIncident.Raci.AccountableParties;
+            incident.Raci.ConsultedParties = updatedIncident.Raci.ConsultedParties;
+            incident.Raci.InformedParties = updatedIncident.Raci.InformedParties;
+        }
+
+        if (incident.Timeline != null && updatedIncident.Timeline != null)
+        {
+            incident.Timeline.CreationTimestamp = updatedIncident.Timeline.CreationTimestamp;
+            incident.Timeline.InProgressTimestamp = updatedIncident.Timeline.InProgressTimestamp;
+            incident.Timeline.ValidationTimestamp = updatedIncident.Timeline.ValidationTimestamp;
+            incident.Timeline.ClosedTimestamp = updatedIncident.Timeline.ClosedTimestamp;
+        }
+
+        if (incident.Documentation != null && updatedIncident.Documentation != null)
+        {
+            incident.Documentation.Description = updatedIncident.Documentation.Description;
+            incident.Documentation.Notes = updatedIncident.Documentation.Notes;
+        }
+
+        // Save changes to the database
         await context.SaveChangesAsync();
+
         return Results.Ok(updatedIncident);
     }
     else

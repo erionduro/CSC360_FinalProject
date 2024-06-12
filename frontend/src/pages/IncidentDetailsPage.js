@@ -4,53 +4,46 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import IncidentTimeline from '../components/IncidentTimeline.js';
 
 const IncidentDetailPage = () => {
-  const { id } = useParams(); // Extract the incident ID from the URL parameters
-  const [apiIncidents, setApiIncidents] = useState(null);
+  const {Id} = useParams(); // Extract the incident ID from the URL parameters
+  const [incident, setIncident] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
 
-  const fetchIncidents = async () => {
+  const fetchIncident = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5123/incidents');
+      const response = await fetch(`http://127.0.0.1:5123/incidents/`);
       if (!response.ok) {
         throw new Error('Failed to fetch!');
       }
-      const data = await response.json();
-      setApiIncidents(data);
+      const data = await response.json()
+      const incident= data[Id-1];
+      setIncident(incident);
+      setDescription(incident.documentation.description);
+      setNotes(incident.documentation.notes);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching incidents: ', error.message);
+      console.error('Error fetching incident: ', error.message);
       setError(error.message);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchIncidents();
-  }, []);
-
-  useEffect(() => {
-    if (apiIncidents) {
-      const incident = apiIncidents.find(incident => incident.header.id === id);
-      if (incident) {
-        setDescription(incident.documentation.description);
-        setNotes(incident.documentation.notes);
-      }
-    }
-  }, [apiIncidents, id]);
+    fetchIncident();
+  }, [Id]);
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:5123/incidents/${id}`, {
+      const response = await fetch(`http://127.0.0.1:5123/incidents/${Id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...apiIncidents.find(incident => incident.header.id === id),
+          ...incident,
           documentation: {
             description,
             notes,
@@ -61,19 +54,11 @@ const IncidentDetailPage = () => {
         throw new Error('Failed to save!');
       }
       const updatedIncident = await response.json();
-      setApiIncidents(apiIncidents.map(incident =>
-        incident.header.id === id ? updatedIncident : incident
-      ));
+      setIncident(updatedIncident);
       setIsEditing(false);
     } catch (error) {
       console.error('Error saving incident: ', error.message);
     }
-  };
-
-  const setIncident = (updatedIncident) => {
-    setApiIncidents(apiIncidents.map(incident =>
-      incident.header.id === id ? updatedIncident : incident
-    ));
   };
 
   if (loading) {
@@ -83,8 +68,6 @@ const IncidentDetailPage = () => {
   if (error) {
     return <div>Error: {error}</div>;
   }
-
-  const incident = apiIncidents.find(incident => incident.header.id === id);
 
   if (!incident) {
     return <div>Incident not found</div>;
@@ -103,27 +86,35 @@ const IncidentDetailPage = () => {
         <Row>
           <Col>
             <h3>Header</h3>
-            <p>ID: {incident.header.id}</p>
-            <p>Title: {incident.header.title}</p>
-            <p>Type: {incident.header.type}</p>
-            <p>Impact: {incident.header.impact}</p>
-            <p>Urgency: {incident.header.urgency}</p>
-            <p>Priority: {incident.header.priority}</p>
-            <p>Status: {incident.header.status}</p>
-            <p>Created: {new Date(incident.header.createdTimestamp * 1000).toLocaleString()}</p>
+            {incident.header && (
+              <>
+                <p>ID: {incident.header.headerId}</p>
+                <p>Title: {incident.header.title}</p>
+                <p>Type: {incident.header.type}</p>
+                <p>Impact: {incident.header.impact}</p>
+                <p>Urgency: {incident.header.urgency}</p>
+                <p>Priority: {incident.header.priority}</p>
+                <p>Status: {incident.header.status}</p>
+                <p>Created: {new Date(incident.header.createdTimestamp * 1000).toLocaleString()}</p>
+              </>
+            )}
           </Col>
           <Col>
             <h3>RACI</h3>
-            <p>Responsible Parties: {incident.raci.responsibleParties.join(', ')}</p>
-            <p>Accountable Parties: {incident.raci.accountableParties.join(', ')}</p>
-            <p>Consulted Parties: {incident.raci.consultedParties.join(', ')}</p>
-            <p>Informed Parties: {incident.raci.informedParties.join(', ')}</p>
+            {incident.raci && (
+              <>
+                <p>Responsible Parties: {incident.raci.responsibleParties.join(', ')}</p>
+                <p>Accountable Parties: {incident.raci.accountableParties.join(', ')}</p>
+                <p>Consulted Parties: {incident.raci.consultedParties.join(', ')}</p>
+                <p>Informed Parties: {incident.raci.informedParties.join(', ')}</p>
+              </>
+            )}
           </Col>
         </Row>
         <Row>
           <Col>
             <h3>Timeline</h3>
-            <IncidentTimeline incident={incident} setIncident={setIncident} />
+            {incident.timeline && <IncidentTimeline incident={incident} setIncident={setIncident} />}
           </Col>
           <Col>
             <h3>Documentation</h3>

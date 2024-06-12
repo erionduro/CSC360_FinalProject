@@ -40,7 +40,7 @@ const AddIncidentPage = () => {
 
     const newIncident = {
       header: {
-        id: `INC${Math.floor(Math.random() * 100000)}`,
+        headerId: `INC${Math.floor(Math.random() * 100000)}`,
         title,
         type,
         impact,

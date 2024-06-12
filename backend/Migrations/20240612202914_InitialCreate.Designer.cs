@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace backend.Migrations
 {
     [DbContext(typeof(IncidentContext))]
-    [Migration("20240612174540_initialCreate")]
-    partial class initialCreate
+    [Migration("20240612202914_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -141,16 +141,16 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ClosedTimestamp")
+                    b.Property<long?>("ClosedTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("CreationTimestamp")
+                    b.Property<long?>("CreationTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("InProgressTimestamp")
+                    b.Property<long?>("InProgressTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ValidationTimestamp")
+                    b.Property<long?>("ValidationTimestamp")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Row, Col, Card } from 'react-bootstrap';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import IncidentAlerts from '../components/IncidentAlerts';
 import GraphMTTR from '../components/GraphMTTR';
 import PieChartPriority from '../components/PieChartPriority';
@@ -11,18 +11,22 @@ import DashboardTimeline from '../components/DashboardTimeline';
 
 function DashboardPage() {
   const [apiIncidents, setApiIncidents] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchIncidents = async () => {
-    try{
+    try {
       const response = await fetch('http://127.0.0.1:5123/incidents');
-      if (!response.ok){
+      if (!response.ok) {
         throw new Error('Failed to fetch!');
       }
       const data = await response.json();
       setApiIncidents(data);
-      console.log(apiIncidents);
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching incidents: ', error.message)
+      console.error('Error fetching incidents:', error.message);
+      setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -30,8 +34,12 @@ function DashboardPage() {
     fetchIncidents();
   }, []);
 
-  if (!apiIncidents) {
+  if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -53,7 +61,7 @@ function DashboardPage() {
         <Col>
           <Card>
             <Card.Body>
-              <IncidentAlerts incidents={apiIncidents}/>
+              <IncidentAlerts incidents={apiIncidents} />
             </Card.Body>
           </Card>
         </Col>
@@ -88,7 +96,7 @@ function DashboardPage() {
               <div>
                 <Card>
                   <Card.Body>
-                    <BarChartStatus incidents={apiIncidents}/>
+                    <BarChartStatus incidents={apiIncidents} />
                   </Card.Body>
                 </Card>
               </div>

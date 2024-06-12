@@ -37,7 +37,7 @@ export default function DashboardTimeline( {incidents} ) {
                 </p>
                 <p>{incident.header.status}</p>
                 <p>{incident.header.priority} priority</p>
-                <Link to={`/incident/${incident.header.id}`}>
+                <Link to={`/incident/${incident.id}`}>
                   <Button variant="secondary">
                     View Incident
                   </Button>

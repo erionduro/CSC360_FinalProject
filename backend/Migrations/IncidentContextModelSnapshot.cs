@@ -138,16 +138,16 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ClosedTimestamp")
+                    b.Property<long?>("ClosedTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("CreationTimestamp")
+                    b.Property<long?>("CreationTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("InProgressTimestamp")
+                    b.Property<long?>("InProgressTimestamp")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ValidationTimestamp")
+                    b.Property<long?>("ValidationTimestamp")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
