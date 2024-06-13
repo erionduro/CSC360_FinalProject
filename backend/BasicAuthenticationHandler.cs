@@ -38,8 +38,15 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         }
     
         if (username == "eduro@depaul.edu" && password == "password"){
-            return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(
-                new ClaimsPrincipal(), "BasicAuthentication")));
+            var claims = new System.Security.Claims.Claim[]{
+                new System.Security.Claims.Claim(ClaimTypes.Name, username)
+            };
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, Scheme.Name);
+            var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+            return Task.FromResult(AuthenticateResult.Success(ticket));
+            //return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(
+            //   new ClaimsPrincipal(), "BasicAuthentication")));
         }
     
         return Task.FromResult(AuthenticateResult.Fail("Failed authentication"));
