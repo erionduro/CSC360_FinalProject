@@ -1,6 +1,10 @@
 using System.Text.Json;
 using DBIncidents;
 using Microsoft.EntityFrameworkCore;
+using backend;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,8 +18,37 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<IncidentContext>();
+builder.Services.AddAuthorization();
+builder.Services.AddSwaggerGen(c =>
+{
+    // Define the Basic Authentication scheme
+    c.AddSecurityDefinition("basic", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "basic",
+        In = ParameterLocation.Header,
+        Description = "Basic Authentication header using the Bearer scheme."
+    });
+
+    // Specify that all operations require the Basic Authentication scheme
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "basic"
+                }
+            },
+            new string[] {}
+        }
+    });
+});builder.Services.AddDbContext<IncidentContext>();
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
 var app = builder.Build();
 
@@ -26,7 +59,8 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 app.UseCors("AllowAllOrigins");
-
+app.UseAuthentication();
+app.UseAuthorization();
 // Initialize the database
 using (var scope = app.Services.CreateScope())
 {
@@ -78,18 +112,10 @@ app.MapPost("/incidents", async (Incident newIncident, IncidentContext context) 
     await context.SaveChangesAsync();
 
     // Log the inserted incident for debugging
-    var insertedIncident = await context.Incident
-                                        .Include(i => i.Header)
-                                        .Include(i => i.Raci)
-                                        .Include(i => i.Timeline)
-                                        .Include(i => i.Documentation)
-                                        .FirstOrDefaultAsync(i => i.Header.HeaderId == newIncident.Header.HeaderId);
-    Console.WriteLine($"Inserted Incident: {JsonSerializer.Serialize(insertedIncident)}");
-
     return Results.Ok(newIncident);
 })
 .WithName("CreateIncident")
-.WithOpenApi();
+.WithOpenApi().RequireAuthorization(new AuthorizeAttribute() {AuthenticationSchemes="BasicAuthentication"});
 
 app.MapPut("/incidents/{id}", async (int id, Incident updatedIncident, IncidentContext context) =>
 {
