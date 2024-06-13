@@ -1,14 +1,18 @@
+
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MDBBtn, MDBContainer, MDBRow, MDBCol, MDBIcon, MDBInput } from 'mdb-react-ui-kit';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { Container, Row, Col } from 'react-bootstrap';
+import RegisterPage from './RegisterPage';
 
 function LoginPage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleRegisterModalClose = () => setShowRegisterModal(false);
   const handleRegisterModalShow = () => setShowRegisterModal(true);
@@ -21,7 +25,7 @@ function LoginPage() {
     const credentials = btoa(`${email}:${password}`);
 
     try {
-      const response = await fetch('http://127.0.0.1:5172/Login', {
+      const response = await fetch('http://127.0.0.1:5123/login', {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${credentials}`,
@@ -32,6 +36,7 @@ function LoginPage() {
       if (response.ok) {
         // Handle successful login
         console.log('Login successful');
+        navigate('/dashboard');
       } else {
         // Handle login failure
         console.log('Login failed');
@@ -70,7 +75,7 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <MDBBtn className="mb-4 px-5 mx-5 w-100" color='info' size='lg' type="submit">Login</MDBBtn>
+              <MDBBtn className="mb-4 px-5 mx-5 w-100" color='info' size='lg' href="/dashboard" type="submit">Login</MDBBtn>
             </form>
             <p className="small mb-3 ms-5"><a className="text-muted" href="#!" onClick={handleForgotPasswordModalShow}>Forgot password?</a></p>
             <p className='ms-5'>Don't have an account? <a className="link-info" onClick={handleRegisterModalShow}>Register here</a></p>
@@ -87,16 +92,11 @@ function LoginPage() {
           <Modal.Title>Create Account</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {/* Add form for creating account */}
-          <p>Form for creating account goes here...</p>
+          <RegisterPage />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleRegisterModalClose}>
             Close
-          </Button>
-          {/* Add logic to handle account creation */}
-          <Button variant="primary" onClick={handleRegisterModalClose}>
-            Create Account
           </Button>
         </Modal.Footer>
       </Modal>
@@ -114,7 +114,6 @@ function LoginPage() {
           <Button variant="secondary" onClick={handleForgotPasswordModalClose}>
             Close
           </Button>
-          {/* Add logic to handle password reset */}
           <Button variant="primary" onClick={handleForgotPasswordModalClose}>
             Reset Password
           </Button>
