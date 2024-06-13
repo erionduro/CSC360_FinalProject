@@ -1,10 +1,11 @@
 using System.Text.Json;
 using DBIncidents;
 using Microsoft.EntityFrameworkCore;
-using backend;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,11 +69,13 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
-app.MapGet("/incidents", async (IncidentContext context) =>
+app.MapGet("/incidents", async (HttpContext context) =>
 {
     try
     {
-        if (!context.Incident.Any())
+        var incidentContext = context.RequestServices.GetRequiredService<IncidentContext>();
+
+        if (!incidentContext.Incident.Any())
         {
             var jsonOptions = new JsonSerializerOptions
             {
@@ -83,17 +86,17 @@ app.MapGet("/incidents", async (IncidentContext context) =>
 
             if (incidents != null)
             {
-                context.Incident.AddRange(incidents);
-                await context.SaveChangesAsync();
+                incidentContext.Incident.AddRange(incidents);
+                await incidentContext.SaveChangesAsync();
             }
         }
 
-        var retrievedIncidents = await context.Incident
-                                              .Include(i => i.Header)
-                                              .Include(i => i.Raci)
-                                              .Include(i => i.Timeline)
-                                              .Include(i => i.Documentation)
-                                              .ToListAsync();
+        var retrievedIncidents = await incidentContext.Incident
+                                                     .Include(i => i.Header)
+                                                     .Include(i => i.Raci)
+                                                     .Include(i => i.Timeline)
+                                                     .Include(i => i.Documentation)
+                                                     .ToListAsync();
 
         return Results.Ok(retrievedIncidents);
     }
@@ -104,6 +107,63 @@ app.MapGet("/incidents", async (IncidentContext context) =>
     }
 })
 .WithName("GetIncidents")
+.WithOpenApi()
+.WithMetadata(new Microsoft.AspNetCore.Mvc.ApplicationModels.PageConventionCollection());
+
+app.MapPost("/login", async (HttpRequest request, IncidentContext context) =>
+{
+    if (!request.Headers.ContainsKey("Authorization"))
+    {
+        return Results.Unauthorized();
+    }
+
+    var authHeader = System.Net.Http.Headers.AuthenticationHeaderValue.Parse(request.Headers["Authorization"]);
+    var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
+    var credentials = System.Text.Encoding.UTF8.GetString(credentialBytes).Split(':', 2);
+    var username = credentials[0];
+    var password = credentials[1];
+
+    var user = await context.Set<User>().SingleOrDefaultAsync(u => u.Username == username);
+    if (user == null || !VerifyPasswordHash(password, user.PasswordHash))
+    {
+        return Results.Unauthorized();
+    }
+
+    return Results.Ok("Login successful");
+});
+
+// Define the VerifyPasswordHash method
+bool VerifyPasswordHash(string password, string storedHash)
+{
+    // Add your password verification logic here
+    // For example, you can use a hashing algorithm to compare the stored hash with the hash of the provided password
+    // Return true if the password is valid, false otherwise
+    return true;
+};
+
+app.MapPost("/register", async (User newUser, IncidentContext context) =>
+{
+    byte[] salt = new byte[128 / 8];
+    using (var rng = RandomNumberGenerator.Create())
+    {
+        rng.GetBytes(salt);
+    }
+
+    string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+        password: newUser.PasswordHash,
+        salt: salt,
+        prf: KeyDerivationPrf.HMACSHA1,
+        iterationCount: 10000,
+        numBytesRequested: 256 / 8));
+
+    newUser.PasswordHash = hashed;
+
+    context.Set<User>().Add(newUser);
+    await context.SaveChangesAsync();
+
+    return Results.Ok(newUser);
+})
+.WithName("RegisterUser")
 .WithOpenApi();
 
 app.MapPost("/incidents", async (Incident newIncident, IncidentContext context) =>
@@ -123,7 +183,8 @@ app.MapPut("/incidents/{id}", async (int id, Incident updatedIncident, IncidentC
                                          .Include(i => i.Raci)
                                          .Include(i => i.Timeline)
                                          .Include(i => i.Documentation)
-                                         .FirstOrDefaultAsync(i => i.Header.Id == id);
+                                         .Cast<Incident>() // Cast to the appropriate type
+                                         .SingleOrDefaultAsync(i => i.Header.Id == id);
 
     if (incident != null)
     {
